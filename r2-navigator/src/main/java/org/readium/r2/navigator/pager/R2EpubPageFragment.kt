@@ -28,9 +28,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.webkit.WebViewClientCompat
 import org.readium.r2.navigator.*
-import org.readium.r2.shared.APPEARANCE_REF
-import org.readium.r2.shared.Locations
-import org.readium.r2.shared.SCROLL_REF
+import org.readium.r2.navigator.R
+import org.readium.r2.shared.*
 import java.io.IOException
 import java.io.InputStream
 
@@ -45,6 +44,9 @@ class R2EpubPageFragment : Fragment() {
 
     lateinit var webView: R2WebView
     lateinit var listener: IR2Activity
+
+    var isWebViewReady = false
+        private set
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -176,8 +178,9 @@ class R2EpubPageFragment : Fragment() {
                     }
 
                 }
-                webView.listener.onPageLoaded()
 
+                isWebViewReady = true
+                webView.listener.onPageLoaded()
             }
 
             // prevent favicon.ico to be loaded, this was causing NullPointerException in NanoHttp
@@ -243,6 +246,12 @@ class R2EpubPageFragment : Fragment() {
         return v
     }
 
+    override fun onDestroyView() {
+        isWebViewReady = false
+        (activity as IR2Activity).onPageDestroyed()
+        super.onDestroyView()
+    }
+
     companion object {
 
         fun newInstance(url: String, title: String): R2EpubPageFragment {
@@ -257,5 +266,3 @@ class R2EpubPageFragment : Fragment() {
     }
 
 }
-
-
