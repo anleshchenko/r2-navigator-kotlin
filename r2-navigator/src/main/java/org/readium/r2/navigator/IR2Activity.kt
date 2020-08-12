@@ -42,6 +42,7 @@ interface IR2Activity {
     fun highlightActivated(id: String) {}
     fun highlightAnnotationMarkActivated(id: String) {}
     fun progressionDidChange(progression: Double) {}
+    fun onPropertyApplied(propertyName: String) {}
 }
 
 interface IR2TTS {

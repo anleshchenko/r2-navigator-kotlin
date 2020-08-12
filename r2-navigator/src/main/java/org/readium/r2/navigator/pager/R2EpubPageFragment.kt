@@ -13,7 +13,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.util.Base64
 import android.util.DisplayMetrics
 import android.view.KeyEvent
@@ -47,6 +46,8 @@ class R2EpubPageFragment : Fragment() {
 
     lateinit var webView: R2WebView
     lateinit var listener: IR2Activity
+
+    private var url: String? = null
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -145,44 +146,8 @@ class R2EpubPageFragment : Fragment() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
 
-                val currentFragment: R2EpubPageFragment = (webView.listener.resourcePager?.adapter as R2PagerAdapter).getCurrentFragment() as R2EpubPageFragment
-
-                if (this@R2EpubPageFragment.tag == currentFragment.tag) {
-                    val epubNavigator = (webView.navigator as? R2EpubActivity)
-                    var locations = epubNavigator?.pendingLocator?.locations
-                    epubNavigator?.pendingLocator = null
-
-                    // TODO this seems to be needed, will need to test more
-                    if (url!!.indexOf("#") > 0) {
-                        val id = url.substring(url.indexOf('#'))
-                        webView.loadUrl("javascript:scrollAnchor($id);")
-                        locations = Locator.Locations(fragments = listOf(id))
-                    }
-
-                    if (locations != null && locations.fragments.isEmpty()) {
-                        locations.progression?.let { progression ->
-                            currentFragment.webView.progression = progression
-
-                            if (webView.listener.preferences.getBoolean(SCROLL_REF, false)) {
-
-                                currentFragment.webView.scrollToPosition(progression)
-
-                            } else {
-                                // FIXME: We need a better way to wait, because if the value is too low it fails
-                                (object : CountDownTimer(200, 1) {
-                                    override fun onTick(millisUntilFinished: Long) {}
-                                    override fun onFinish() {
-                                        currentFragment.webView.calculateCurrentItem()
-                                        currentFragment.webView.setCurrentItem(currentFragment.webView.mCurItem, false)
-                                    }
-                                }).start()
-                            }
-                        }
-                    }
-
-                }
+                this@R2EpubPageFragment.url = url
                 webView.listener.onPageLoaded()
-
             }
 
             // prevent favicon.ico to be loaded, this was causing NullPointerException in NanoHttp
@@ -239,6 +204,37 @@ class R2EpubPageFragment : Fragment() {
         }
 
         return v
+    }
+
+    fun scrollToCurrentPosition() {
+        val currentFragment: R2EpubPageFragment =
+                (webView.listener.resourcePager?.adapter as R2PagerAdapter).getCurrentFragment() as R2EpubPageFragment
+
+        if (this@R2EpubPageFragment.tag == currentFragment.tag) {
+            val epubNavigator = (webView.navigator as? R2EpubActivity)
+            var locations = epubNavigator?.pendingLocator?.locations
+            epubNavigator?.pendingLocator = null
+
+            // TODO this seems to be needed, will need to test more
+            if (url != null && url!!.indexOf("#") > 0) {
+                val id = url!!.substring(url!!.indexOf('#'))
+                webView.loadUrl("javascript:scrollAnchor($id);")
+                locations = Locator.Locations(fragments = listOf(id))
+            }
+
+            if (locations != null && locations.fragments.isEmpty()) {
+                locations.progression?.let { progression ->
+                    currentFragment.webView.progression = progression
+
+                    if (webView.listener.preferences.getBoolean(SCROLL_REF, false)) {
+                        currentFragment.webView.scrollToPosition(progression)
+                    } else {
+                        currentFragment.webView.calculateCurrentItem()
+                        currentFragment.webView.setCurrentItem(currentFragment.webView.mCurItem, false)
+                    }
+                }
+            }
+        }
     }
 
     companion object {

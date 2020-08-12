@@ -34,6 +34,7 @@ import org.readium.r2.navigator.pager.R2EpubPageFragment
 import org.readium.r2.navigator.pager.R2PagerAdapter
 import org.readium.r2.navigator.pager.R2ViewPager
 import org.readium.r2.shared.COLUMN_COUNT_REF
+import org.readium.r2.shared.SCROLL_NAME
 import org.readium.r2.shared.SCROLL_REF
 import org.readium.r2.shared.extensions.destroyPublication
 import org.readium.r2.shared.extensions.getPublication
@@ -566,6 +567,12 @@ open class R2EpubActivity : AppCompatActivity(), IR2Activity, IR2Selectable, IR2
 
     override fun onPageLoaded() {
         super.onPageLoaded()
+    }
+
+    override fun onPropertyApplied(propertyName: String) {
+        if (propertyName == SCROLL_NAME) {
+            (adapter.getCurrentFragment() as R2EpubPageFragment).scrollToCurrentPosition()
+        }
     }
 
 }
