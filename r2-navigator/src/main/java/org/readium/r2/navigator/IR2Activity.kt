@@ -37,6 +37,7 @@ interface IR2Activity {
     fun nextResource(v: View? = null) {}
     fun previousResource(v: View? = null) {}
     fun onPageChanged(pageIndex: Int, totalPages: Int, url: String) {}
+    fun onScrollChanged() {}
     fun onPageEnded(end: Boolean) {}
     fun onPageLoaded() {}
     fun highlightActivated(id: String) {}

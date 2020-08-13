@@ -239,7 +239,15 @@ open class R2BasicWebView(context: Context, attrs: AttributeSet) : WebView(conte
     }
 
     fun scrollToPosition(progression: Double) {
-        this.evaluateJavascript("scrollToPosition(\"$progression\", \"${listener.publication.contentLayout.readingProgression.value}\");", null)
+        scrollToPosition(progression) {
+            // empty
+        }
+    }
+
+    fun scrollToPosition(progression: Double, onScrolled: () -> Unit) {
+        this.evaluateJavascript("scrollToPosition(\"$progression\", \"${listener.publication.contentLayout.readingProgression.value}\");") {
+            onScrolled()
+        }
     }
 
     fun setScrollMode(scrollMode: Boolean) {
